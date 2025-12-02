@@ -153,10 +153,37 @@ class Score:  # 演習1:スコア表示
         self.rct.center = (100, HEIGHT - 50)
 
     def update(self, screen: pg.Surface):
+        """
+        スコアを更新する
+        引数 screen : 画面Surface
+        """
         # 現在のスコアを再描画
         self.img = self.fonto.render(f"Score: {self.value}", 0, self.color)
         screen.blit(self.img, self.rct)
-  
+
+
+class Explosion:  # 演習3:爆発エフェクトを追加
+    """
+    爆発エフェクトに関するクラス
+    """
+
+    def __init__(self, center:list[int,int]):
+        img0 = pg.image.load("fig/explosion.gif")
+        img = pg.transform.rotozoom(pg.transform.flip(img0, True, False), 45, 0.8)
+        self.imgs = [img0,img]
+        self.rct = self.imgs[0].get_rect()
+        self.rct.center = center  
+        self.life = 20 
+
+    def update(self,screen:pg.Surface):
+        """
+        爆発の表示時間をカウントし、画像を切り替える
+        引数 screen :画面Surface
+        """
+        self.life -= 1
+        img = self.imgs[self.life % len(self.imgs)]
+        screen.blit(img, self.rct)
+
 
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
@@ -175,6 +202,9 @@ def main():
 
     #演習2:複数ビーム
     beams = []  # 複数のビームを扱う空のリスト
+    
+    #演習3:爆発エフェクト
+    explotions = []  #爆発エフェクト用の空リスト
 
     beam = None  # ゲーム初期化時にはビームは存在しない
     clock = pg.time.Clock()
@@ -208,14 +238,16 @@ def main():
             for i, beam in enumerate(beams):
                 if beam is not None:
                     if beam.rct.colliderect(bomb.rct):
+                        explotions.append(Explosion(bomb.rct.center))
                         beams[i], bombs[b] = None, None
                         bird.change_img(6, screen)
                         score.value += 1
 
+
         # 練習5: 要素がNoneでない爆弾のリストに更新
         bombs = [bomb for bomb in bombs if bomb is not None]
-        
         beams = [beam for beam in beams if beam is not None]
+        explotions = [ex for ex in explotions if ex.life > 0]
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
         for beam in beams:  # ビームのNone判定
@@ -225,6 +257,10 @@ def main():
 
         for bomb in bombs:  # 爆弾のNone判定
             bomb.update(screen)
+            
+        
+        for ex in explotions:
+            ex.update(screen)
   
         score.update(screen)
         pg.display.update()
