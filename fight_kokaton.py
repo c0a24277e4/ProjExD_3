@@ -176,7 +176,6 @@ class Explosion:  # 演習3:爆発エフェクトを追加
     """
     爆発エフェクトに関するクラス
     """
-
     def __init__(self, center:list[int,int]):
         img0 = pg.image.load("fig/explosion.gif")
         img = pg.transform.rotozoom(pg.transform.flip(img0, True, False), 45, 0.8)
